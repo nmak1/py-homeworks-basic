@@ -62,6 +62,16 @@ class Lecturer(Mentor):
     def __lt__(self, other):
         return self.calculate_avg_grade() < other.calculate_avg_grade()
 
+    def __gt__(self, other):
+        return self.calculate_avg_grade() > other.calculate_avg_grade()
+
+
+    def __le__(self, other):
+        return self.calculate_avg_grade() <= other.calculate_avg_grade()
+
+    def __ge__(self, other):
+        return self.calculate_avg_grade() >= other.calculate_avg_grade()
+
 
 class Reviewer(Mentor):
     def __init__(self, name, surname):
@@ -117,8 +127,8 @@ print(student_1)
 print(student_2)
 
 # Сравниваем студентов и лекторов
-print(student_1 > student_2)
-print(lecturer_1 < lecturer_2)
+print("lecturer_2 > lecturer_1 is", lecturer_2 > lecturer_1)
+print("lecturer_2 < lecturer_1 is",lecturer_2 < lecturer_1)
 
 # Функции для подсчета средней оценки
 def calculate_avg_hw_grade(students, course):
