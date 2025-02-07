@@ -1,3 +1,6 @@
+from itertools import chain
+
+
 class Student:
     def __init__(self, name, surname):
         self.name = name
@@ -7,13 +10,16 @@ class Student:
         self.grades = {}
 
     def rate_lecture(self, lecturer, course, grade):
-        if isinstance(lecturer, Lecturer) and course in self.courses_in_progress and course in lecturer.courses_attached:
-            if course in lecturer.grades:
-                lecturer.grades[course] += [grade]
-            else:
-                lecturer.grades[course] = [grade]
-        else:
-            return 'Ошибка'
+        if not isinstance(lecturer, Lecturer):
+            raise TypeError("Можно оценивать только лекторов")
+        if course not in self.courses_in_progress:
+            raise ValueError(f"Студент {self.name} не изучает курс '{course}'")
+        if course not in lecturer.courses_attached:
+            raise ValueError(f"Лектор {lecturer.name} не ведет курс '{course}'")
+        if not isinstance(grade, (int, float)) or not (1 <= grade <= 10):
+            raise ValueError("Оценка должна быть числом от 1 до 10")
+
+        lecturer.grades.setdefault(course, []).append(grade)
 
     def __str__(self):
         avg_grade = self.calculate_avg_grade()
@@ -25,13 +31,12 @@ class Student:
                 f'Завершенные курсы: {finished_courses}')
 
     def calculate_avg_grade(self):
-        if not self.grades:
-            return 0
-        total = sum(sum(grades) for grades in self.grades.values())
-        count = sum(len(grades) for grades in self.grades.values())
-        return round(total / count, 1)
+        all_grades = list(chain.from_iterable(self.grades.values()))
+        return round(sum(all_grades) / len(all_grades), 1) if all_grades else 0
 
     def __lt__(self, other):
+        if not isinstance(other, Student):
+            return NotImplemented
         return self.calculate_avg_grade() < other.calculate_avg_grade()
 
 class Mentor:
@@ -42,6 +47,8 @@ class Mentor:
 
     def __str__(self):
         return f'Имя: {self.name}\nФамилия: {self.surname}'
+
+
 
 class Lecturer(Mentor):
     def __init__(self, name, surname):
@@ -130,26 +137,23 @@ print(student_2)
 print("lecturer_2 > lecturer_1 is", lecturer_2 > lecturer_1)
 print("lecturer_2 < lecturer_1 is",lecturer_2 < lecturer_1)
 
-# Функции для подсчета средней оценки
-def calculate_avg_hw_grade(students, course):
-    total = 0
-    count = 0
-    for student in students:
-        if course in student.grades:
-            total += sum(student.grades[course])
-            count += len(student.grades[course])
-    return round(total / count, 1) if count else 0
+# Функция для подсчета средней оценки
+def calculate_avg_grade(people, course, grade_type="grades"):
+    if not people:
+        return 0  # Возвращаем 0, если список людей пуст
 
-def calculate_avg_lecture_grade(lecturers, course):
     total = 0
     count = 0
-    for lecturer in lecturers:
-        if course in lecturer.grades:
-            total += sum(lecturer.grades[course])
-            count += len(lecturer.grades[course])
+
+    for person in people:
+        grades = getattr(person, grade_type, {}).get(course, [])
+        if grades:  # Проверяем, есть ли оценки по курсу
+            total += sum(grades)
+            count += len(grades)
+
     return round(total / count, 1) if count else 0
 
 # Подсчет средней оценки за домашние задания и лекции
-print(calculate_avg_hw_grade([student_1, student_2], 'Python'))
-print(calculate_avg_lecture_grade([lecturer_1, lecturer_2], 'Python'))
+print(calculate_avg_grade([student_1, student_2], 'Python'))
+print(calculate_avg_grade([lecturer_1, lecturer_2], 'Python'))
 
