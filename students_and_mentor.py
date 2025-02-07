@@ -1,6 +1,7 @@
 from itertools import chain
 
 
+
 class Student:
     def __init__(self, name, surname):
         self.name = name
@@ -93,6 +94,32 @@ class Reviewer(Mentor):
         else:
             return 'Ошибка'
 
+
+class GradeCalculator:
+    @staticmethod
+    def calculate_avg_grade(people, course, grade_type="grades"):
+        """
+        Рассчитывает среднюю оценку по курсу для списка людей.
+
+        :param people: Список объектов (например, студентов) с атрибутами оценок.
+        :param course: Название курса, для которого рассчитывается средняя оценка.
+        :param grade_type: Тип оценок (по умолчанию "grades").
+        :return: Средняя оценка, округленная до одного знака после запятой.
+        """
+        if not people:
+            return 0  # Если список людей пуст, возвращаем 0
+
+        total = 0
+        count = 0
+
+        for person in people:
+            grades = getattr(person, grade_type, {}).get(course, [])
+            if grades:  # Проверяем, есть ли оценки по курсу
+                total += sum(grades)
+                count += len(grades)
+
+        return round(total / count, 1) if count else 0
+
 # Создаем экземпляры классов
 lecturer_1 = Lecturer('Ivan', 'Ivanov')
 lecturer_1.courses_attached.append('Python')
@@ -137,23 +164,8 @@ print(student_2)
 print("lecturer_2 > lecturer_1 is", lecturer_2 > lecturer_1)
 print("lecturer_2 < lecturer_1 is",lecturer_2 < lecturer_1)
 
-# Функция для подсчета средней оценки
-def calculate_avg_grade(people, course, grade_type="grades"):
-    if not people:
-        return 0  # Возвращаем 0, если список людей пуст
-
-    total = 0
-    count = 0
-
-    for person in people:
-        grades = getattr(person, grade_type, {}).get(course, [])
-        if grades:  # Проверяем, есть ли оценки по курсу
-            total += sum(grades)
-            count += len(grades)
-
-    return round(total / count, 1) if count else 0
 
 # Подсчет средней оценки за домашние задания и лекции
-print(calculate_avg_grade([student_1, student_2], 'Python'))
-print(calculate_avg_grade([lecturer_1, lecturer_2], 'Python'))
+print(GradeCalculator.calculate_avg_grade([student_1, student_2], 'Python'))
+print(GradeCalculator.calculate_avg_grade([lecturer_1, lecturer_2], 'Python'))
 
