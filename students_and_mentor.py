@@ -1,14 +1,29 @@
 from itertools import chain
-
+from typing import Any
 
 
 class Student:
+    # Статический список для хранения всех студентов
+    students_list = []
+
     def __init__(self, name, surname):
         self.name = name
         self.surname = surname
         self.courses_in_progress = []
         self.finished_courses = []
         self.grades = {}
+        # Добавляем студента в список при создании
+        self.add_student()
+
+    @classmethod
+    def add_student(cls):
+        """Добавляет нового студента в список."""
+        cls.students_list.append(cls)
+
+    @classmethod
+    def get_all_students(cls):
+        """Возвращает список всех студентов."""
+        return cls.students_list
 
     def rate_lecture(self, lecturer, course, grade):
         if not isinstance(lecturer, Lecturer):
@@ -40,21 +55,51 @@ class Student:
             return NotImplemented
         return self.calculate_avg_grade() < other.calculate_avg_grade()
 
+
 class Mentor:
+    # Статический список для хранения всех менторов
+    mentors_list = []
+
     def __init__(self, name, surname):
         self.name = name
         self.surname = surname
         self.courses_attached = []
+        # Добавляем ментора в список при создании
+        self.add_mentor()
+
+    @classmethod
+    def add_mentor(cls):
+        """Добавляет нового ментора в список."""
+        cls.mentors_list.append(cls)
+
+    @classmethod
+    def get_all_mentors(cls):
+        """Возвращает список всех менторов."""
+        return cls.mentors_list
 
     def __str__(self):
         return f'Имя: {self.name}\nФамилия: {self.surname}'
 
 
-
 class Lecturer(Mentor):
+    # Статический список для хранения всех лекторов
+    lecturers_list = []
+
     def __init__(self, name, surname):
         super().__init__(name, surname)
         self.grades = {}
+        # Добавляем лектора в список при создании
+        self.add_lecturer()
+
+    @classmethod
+    def add_lecturer(cls):
+        """Добавляет нового лектора в список."""
+        cls.lecturers_list.append(cls)
+
+    @classmethod
+    def get_all_lecturers(cls):
+        """Возвращает список всех лекторов."""
+        return cls.lecturers_list
 
     def __str__(self):
         avg_grade = self.calculate_avg_grade()
@@ -72,7 +117,6 @@ class Lecturer(Mentor):
 
     def __gt__(self, other):
         return self.calculate_avg_grade() > other.calculate_avg_grade()
-
 
     def __le__(self, other):
         return self.calculate_avg_grade() <= other.calculate_avg_grade()
@@ -120,6 +164,7 @@ class GradeCalculator:
 
         return round(total / count, 1) if count else 0
 
+
 # Создаем экземпляры классов
 lecturer_1 = Lecturer('Ivan', 'Ivanov')
 lecturer_1.courses_attached.append('Python')
@@ -133,7 +178,7 @@ reviewer_1.courses_attached.append('Python')
 reviewer_2 = Reviewer('Anna', 'Ivanova')
 reviewer_2.courses_attached.append('Git')
 
-student_1= Student('Roy', 'Eman')
+student_1 = Student('Roy', 'Eman')
 student_1.courses_in_progress.append('Python')
 student_1.finished_courses.append('Введение в программирование')
 
@@ -162,10 +207,12 @@ print(student_2)
 
 # Сравниваем студентов и лекторов
 print("lecturer_2 > lecturer_1 is", lecturer_2 > lecturer_1)
-print("lecturer_2 < lecturer_1 is",lecturer_2 < lecturer_1)
-
+print("lecturer_2 < lecturer_1 is", lecturer_2 < lecturer_1)
 
 # Подсчет средней оценки за домашние задания и лекции
-print(GradeCalculator.calculate_avg_grade([student_1, student_2], 'Python'))
-print(GradeCalculator.calculate_avg_grade([lecturer_1, lecturer_2], 'Python'))
+students = Student.get_all_students()
+lecturers = Lecturer.get_all_lecturers()
+
+print("Средняя оценка студентов по Python:", GradeCalculator.calculate_avg_grade(students, 'Python'))
+print("Средняя оценка лекторов по Python:", GradeCalculator.calculate_avg_grade(lecturers, 'Python'))
 
